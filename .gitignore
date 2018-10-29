@@ -1,4 +1,7 @@
+hashtopolis/bin/
+hashtopolis/obj/
+*.suo
+.vs/
+.suo
 
-.idea/
-*.iml
-java/
+
