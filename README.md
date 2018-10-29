@@ -1,11 +1,3 @@
-# Hashtopolis Agents
+# Hashtopolis C# Agent
 
-Official agents for using the distributed hashcracker [Hashtopolis](https://github.com/s3inlc/hashtopolis).
-
-Currently available agents:
-- [C#](csharp) (Currently not recommended as not all new features are available)
-- [Python](python)
-
-## Protocol Documentation
-
-A documentation to the protocol which is used to communicate between the agent and the server can be found here: [Protocol.pdf](https://github.com/s3inlc/hashtopolis/blob/master/doc/protocol.pdf)
+This agent is used with [Hashtopolis](https://github.com/s3inlc/hashtopolis), read the wiki or create issues there, visit the [Forum](https://hashtopolis.org).
