@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Web.Script.Serialization;
 using System.Diagnostics;
 namespace hashtopolis
 {
 
-    
+
 
     public struct Packets
     {
@@ -25,6 +26,9 @@ namespace hashtopolis
     {
 
         public static string AppPath = AppDomain.CurrentDomain.BaseDirectory;
+
+        //Read the settings file here
+
         private static string urlPath = Path.Combine(AppPath, "URL");
         private static string serverURL = "";
 
@@ -44,7 +48,7 @@ namespace hashtopolis
                         Directory.CreateDirectory(enumDir);
                     }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Console.WriteLine(e.Data);
                     Console.WriteLine("Unable to create dir {0}", dir);
@@ -57,28 +61,54 @@ namespace hashtopolis
         }
 
 
+
         public static bool loadURL()
-        {
-            if (serverURL == "")
             {
-                if (File.Exists(urlPath))
+                if (serverURL == "")
                 {
-                    serverURL = File.ReadAllText(urlPath);
-                    if (serverURL == "")
+                    if (File.Exists(urlPath))
                     {
-                        File.Delete(urlPath);
+                        serverURL = File.ReadAllText(urlPath);
+                        if (serverURL == "")
+                        {
+                            File.Delete(urlPath);
+                            return false;
+                        }
+                    }
+                    else
+                    {
                         return false;
                     }
                 }
+                return true;
+
+            }
+
+        public static void getSettings()
+        {
+            JavaScriptSerializer jss = new JavaScriptSerializer();
+            string jsonPath = Path.Combine(AppPath, "config.json");
+
+            if (File.Exists(jsonPath))
+            {
+                string jsonContent = File.ReadAllText(jsonPath);
+                Dictionary<string, dynamic> dict = jss.Deserialize<Dictionary<string, dynamic>>(jsonContent);
+                if (dict.ContainsKey("url"))
+                {
+                    serverURL = dict["url"];
+                    Console.WriteLine(serverURL);
+                }
                 else
                 {
-                    return false;
+                    Console.WriteLine("Not found");
                 }
+
             }
-            return true;
-
+            else
+            {
+                Console.WriteLine("Not found");
+            }
         }
-
 
         public static Boolean initConnect()
         {
@@ -153,6 +183,8 @@ namespace hashtopolis
 
             string AppVersion = "0.52.6";
             Console.WriteLine("Client Version " + AppVersion);
+
+            getSettings();
 
             initConnect();
             initDirs();
