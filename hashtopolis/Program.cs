@@ -20,15 +20,23 @@ namespace hashtopolis
         public string action = "testConnection";
     }
 
+    public class config_data
+    {
+        public string url { get; set; }
+        public string uuid { get; set; }
+        public string voucher { get; set; }
+        public string token { get; set; }
+    }
 
 
     class Program
     {
-
+      
+         
         public static string AppPath = AppDomain.CurrentDomain.BaseDirectory;
 
         //Read the settings file here
-
+        
         private static string urlPath = Path.Combine(AppPath, "URL");
         private static string serverURL = "";
 
@@ -84,10 +92,24 @@ namespace hashtopolis
 
             }
 
-        public static void getSettings()
+
+        public static void writeSettings(config_data config)
+        {
+            string jsonPath = Path.Combine(AppPath, "config.json");
+            jsonClass jsonProcessor = new jsonClass();
+            string saveSettings = jsonProcessor.toJson(config);
+
+            File.WriteAllText(jsonPath, saveSettings);
+        }
+
+        public static void getSettings(config_data config)
         {
             JavaScriptSerializer jss = new JavaScriptSerializer();
             string jsonPath = Path.Combine(AppPath, "config.json");
+            config.url = "";
+            config.uuid = "";
+            config.token = "";
+            config.voucher = "";
 
             if (File.Exists(jsonPath))
             {
@@ -95,12 +117,19 @@ namespace hashtopolis
                 Dictionary<string, dynamic> dict = jss.Deserialize<Dictionary<string, dynamic>>(jsonContent);
                 if (dict.ContainsKey("url"))
                 {
-                    serverURL = dict["url"];
-                    Console.WriteLine(serverURL);
+                    config.url = dict["url"];
                 }
-                else
+                if (dict.ContainsKey("voucher"))
                 {
-                    Console.WriteLine("Not found");
+                    config.voucher = dict["voucher"];
+                }
+                if (dict.ContainsKey("uuid"))
+                {
+                    config.uuid = dict["uuid"];
+                }
+                if (dict.ContainsKey("token"))
+                {
+                    config.token = dict["token"];
                 }
 
             }
@@ -110,12 +139,13 @@ namespace hashtopolis
             }
         }
 
-        public static Boolean initConnect()
+        public static Boolean initConnect(config_data config)
         {
             jsonClass testConnect = new jsonClass { debugFlag = DebugMode };
             testProp tProp = new testProp();
             string urlMsg = "Please enter server connect URL (https will be used unless specified):";
-            while (!loadURL())
+            Console.WriteLine(config.url);
+            while (config.url == "")
             {
                 Console.WriteLine(urlMsg);
                 string url = Console.ReadLine();
@@ -131,7 +161,10 @@ namespace hashtopolis
                 {
                     if (testConnect.isJsonSuccess(ret))
                     {
-                        File.WriteAllText(urlPath, url);
+                        //File.WriteAllText(urlPath, url);
+                        Console.WriteLine("Connecction successful");
+                        config.url = url;
+                        writeSettings(config);
                     }
                 }
                 else
@@ -181,12 +214,15 @@ namespace hashtopolis
                 }
             }
 
+
             string AppVersion = "0.52.6";
             Console.WriteLine("Client Version " + AppVersion);
 
-            getSettings();
-
-            initConnect();
+            config_data config = new config_data();
+           
+            getSettings(config);
+            Console.Write(config.url);
+            initConnect(config);
             initDirs();
 
             registerClass client = new registerClass { connectURL = serverURL, debugFlag = DebugMode,tokenID = tokenSwitch};
